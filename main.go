@@ -25,6 +25,7 @@ func main() {
 		beego.DirectoryIndex = true
 		beego.StaticDir["/swagger"] = "swagger"
 	}
+
 	testJson()
 	beego.Run()
 }
