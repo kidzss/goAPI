@@ -3,11 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/astaxie/beego"
 	"github.com/bitly/go-simplejson" // for json get
+	_ "goAPI/database"
 	_ "goAPI/docs"
 	_ "goAPI/routers"
-
-	"github.com/astaxie/beego"
 )
 
 type MyData struct {
