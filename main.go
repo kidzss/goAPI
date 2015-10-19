@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/bitly/go-simplejson" // for json get
-	_ "goAPI/database"
+	"goAPI/database"
 	_ "goAPI/docs"
 	_ "goAPI/routers"
 )
@@ -25,7 +25,7 @@ func main() {
 		beego.DirectoryIndex = true
 		beego.StaticDir["/swagger"] = "swagger"
 	}
-
+	database.InsertIntoMysql("reaaa", 0, "15071379972", 18)
 	testJson()
 	beego.Run()
 }
