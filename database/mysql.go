@@ -44,6 +44,20 @@ func InsertIntoMysql(name string, sex int, tel string, age int) {
 // 	db.Close()
 // }
 
+func SelectDataFromSql(id int) string {
+	db, err := sql.Open("mysql", "root:w41615465@/user?charset=utf8")
+	checkErr(err)
+	stmt, err := db.Prepare("SELECT * FROM user_info WHERE id =?")
+	checkErr(err)
+	res, err := stmt.Exec(id)
+	checkErr(err)
+	ids, err := res.LastInsertId()
+	checkErr(err)
+	fmt.Println(ids)
+	db.Close()
+	return "1"
+}
+
 func checkErr(err error) {
 	if err != nil {
 		panic(err)
