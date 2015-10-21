@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/bitly/go-simplejson" // for json get
-	// "goAPI/database"
+	"goAPI/database"
 	_ "goAPI/docs"
 	_ "goAPI/routers"
 )
@@ -21,10 +21,12 @@ type Message struct {
 }
 
 func main() {
-	if beego.RunMode == "dev" {
-		beego.DirectoryIndex = true
-		beego.StaticDir["/swagger"] = "swagger"
-	}
+	defer database.CloseDatabase()
+	// if beego.RunMode == "dev" {
+	// 	beego.DirectoryIndex = true
+	// 	beego.StaticDir["/swagger"] = "swagger"
+	// }
+
 	testJson()
 	beego.Run()
 }

@@ -1,5 +1,5 @@
 create database user character set gbk;
-create table user_info
+create table students
 	（
 		id int unsigned not null auto_increment primary key,
 		name char(8) not null,

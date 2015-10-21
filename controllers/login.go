@@ -22,7 +22,11 @@ func (this *LoginContriller) Post() {
 	password := this.Input().Get("password")
 	if name == "ray" && password == "123" {
 		this.Data["json"] = "login success"
-		database.SelectDataFromSql(1)
+		userinfo, err := database.GetUserInfo(1)
+		if err != nil {
+			panic(err.Error())
+		}
+		fmt.Println(userinfo)
 	} else {
 		this.Data["json"] = "login fail"
 	}

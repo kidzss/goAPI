@@ -3,17 +3,23 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
+	"goAPI/models"
 )
+
+var db *sql.DB
+var err1 error
 
 func init() {
 	fmt.Println("init database")
+	db, err1 = sql.Open("mysql", "root:w41615465@/user?charset=utf8")
+	checkErr(err1)
 
 }
 
 func InsertIntoMysql(name string, sex int, tel string, age int) {
-	db, err := sql.Open("mysql", "root:w41615465@/user?charset=utf8")
-	checkErr(err)
+
 	stmt, err := db.Prepare("INSERT user_info SET name=?,sex=?,tel=?,age=?")
 	checkErr(err)
 	res, err := stmt.Exec(name, sex, tel, age)
@@ -23,7 +29,7 @@ func InsertIntoMysql(name string, sex int, tel string, age int) {
 	checkErr(err)
 
 	fmt.Println(id)
-	db.Close()
+
 }
 
 // func DeleteFromMysql(int id) {
@@ -44,22 +50,26 @@ func InsertIntoMysql(name string, sex int, tel string, age int) {
 // 	db.Close()
 // }
 
-func SelectDataFromSql(id int) string {
-	db, err := sql.Open("mysql", "root:w41615465@/user?charset=utf8")
-	checkErr(err)
-	stmt, err := db.Prepare("SELECT * FROM user_info WHERE id =?")
-	checkErr(err)
-	res, err := stmt.Exec(id)
-	checkErr(err)
-	ids, err := res.LastInsertId()
-	checkErr(err)
-	fmt.Println(ids)
-	db.Close()
-	return "1"
-}
+// func SelectDataFromSql(id int) string {
+// 	o := orm.NewOrm()
+
+// 	return ""
+// }
 
 func checkErr(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func CloseDatabase() {
+	db.Close()
+}
+
+func GetUserInfo(id int) (*models.Userinfo, error) {
+	o := orm.NewOrm()
+	info := new(models.Userinfo)
+	qs := o.QueryTable("user_info")
+	err := qs.Filter("id", id).One(info)
+	return info, err
 }
