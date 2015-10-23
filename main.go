@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/bitly/go-simplejson" // for json get
-	"goAPI/database"
+	// "goAPI/database"
 	_ "goAPI/docs"
+	// "goAPI/models"
 	_ "goAPI/routers"
 )
 
@@ -21,11 +22,14 @@ type Message struct {
 }
 
 func main() {
-	defer database.CloseDatabase()
+	// defer database.CloseDatabase()
 	// if beego.RunMode == "dev" {
 	// 	beego.DirectoryIndex = true
 	// 	beego.StaticDir["/swagger"] = "swagger"
 	// }
+	// u1 := models.User{Name: "hahah", Age: 24, Sex: 1, Tel: "15971470520"}
+	// account1 := models.AccountInfo{MemberId: "15071379972", Account: "15071379972", Password: "111111"}
+	// models.Insert(&account1)
 
 	testJson()
 	beego.Run()

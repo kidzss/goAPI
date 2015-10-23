@@ -3,7 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/astaxie/beego"
-	"goAPI/database"
+	"goAPI/models"
 )
 
 type LoginContriller struct {
@@ -20,16 +20,16 @@ func (this *LoginContriller) Post() {
 	fmt.Println("request:", this.Input().Get("name"))
 	name := this.Input().Get("name")
 	password := this.Input().Get("password")
-	if name == "ray" && password == "123" {
-		this.Data["json"] = "login success"
-		userinfo, err := database.GetUserInfo(1)
-		if err != nil {
-			panic(err.Error())
-		}
-		fmt.Println(userinfo)
-	} else {
-		this.Data["json"] = "login fail"
-	}
 
+	account, err := models.QueryAccount(name, password)
+	if err != nil {
+		fmt.Println(err)
+		this.Data["json"] = "login fail"
+		return
+	} else {
+		fmt.Println("login success", account)
+		this.Ctx.WriteString(account.Account)
+		this.Data["json"] = "login success"
+	}
 	this.ServeJson()
 }

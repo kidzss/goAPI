@@ -1,75 +1,28 @@
 package database
 
 import (
-	"database/sql"
-	"fmt"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
 	"goAPI/models"
 )
 
-var db *sql.DB
-var err1 error
-
 func init() {
-	fmt.Println("init database")
-	db, err1 = sql.Open("mysql", "root:w41615465@/user?charset=utf8")
-	checkErr(err1)
 
+	orm.RegisterModel(new(models.User))                                           //注册表studentinfo 如果没有会自动创建
+	orm.RegisterDriver("mysql", orm.DR_MySQL)                                     //注册mysql驱动
+	orm.RegisterDataBase("default", "mysql", "root:w41615465@/user?charset=utf8") //设置conn中的数据库为默认使用数据库
+	orm.RunSyncdb("default", false, false)                                        //后一个使用true会带上很多打印信息，数据库操作和建表操作的；第二个为true代表强制创建表
+	orm.Debug = true                                                              //true 打印数据库操作日志信息
 }
 
-func InsertIntoMysql(name string, sex int, tel string, age int) {
-
-	stmt, err := db.Prepare("INSERT user_info SET name=?,sex=?,tel=?,age=?")
-	checkErr(err)
-	res, err := stmt.Exec(name, sex, tel, age)
-	checkErr(err)
-
-	id, err := res.LastInsertId()
-	checkErr(err)
-
-	fmt.Println(id)
-
+func Insert(user *models.User) error {
+	dbObj := orm.NewOrm() //实例化数据库操作对象
+	dbObj.Using("user")
+	_, err := dbObj.Insert(user)
+	return err
 }
 
-// func DeleteFromMysql(int id) {
-// 	db, err := sql.Open("mysql", "root:w41615465@/user?charset=utf8")
-// 	checkErr(err)
-// 	//删除数据
-// 	stmt, err = db.Prepare("delete from user_info where id=?")
-// 	checkErr(err)
-
-// 	res, err = stmt.Exec(id)
-// 	checkErr(err)
-
-// 	affect, err = res.RowsAffected()
-// 	checkErr(err)
-
-// 	fmt.Println(affect)
-
-// 	db.Close()
+// func Query() interface{} {
+// 	dbObj := orm.NewOrm() //实例化数据库操作对象
+// 	dbObj.Using("user")
 // }
-
-// func SelectDataFromSql(id int) string {
-// 	o := orm.NewOrm()
-
-// 	return ""
-// }
-
-func checkErr(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
-func CloseDatabase() {
-	db.Close()
-}
-
-func GetUserInfo(id int) (*models.Userinfo, error) {
-	o := orm.NewOrm()
-	info := new(models.Userinfo)
-	qs := o.QueryTable("user_info")
-	err := qs.Filter("id", id).One(info)
-	return info, err
-}
