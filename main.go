@@ -31,7 +31,7 @@ func main() {
 	// account1 := models.AccountInfo{MemberId: "15071379972", Account: "15071379972", Password: "111111"}
 	// models.Insert(&account1)
 
-	testJson()
+	//testJson()
 	beego.Run()
 }
 func testJson() {
