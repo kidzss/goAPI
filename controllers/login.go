@@ -13,6 +13,21 @@ type LoginContriller struct {
 func (this *LoginContriller) Get() {
 	fmt.Println("request:", this.Input().Get("name"))
 	this.Data["json"] = "hello ray get "
+	// name := this.Input().Get("name")
+	// password := this.Input().Get("password")
+	account := &models.Accounts{
+		Account:  "15971470520",
+		Password: "1234567",
+	}
+	models.InsertAccount(account)
+
+	account, err := models.QueryAccount("15971470520", "123456")
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(account)
+	}
+
 	this.ServeJson()
 }
 
