@@ -14,7 +14,7 @@ import (
 type MyData struct {
 	Name  string
 	Other float32
-	Msg   Message
+	Msgs  []Message
 }
 type Message struct {
 	Title string
@@ -31,7 +31,7 @@ func main() {
 	// account1 := models.AccountInfo{MemberId: "15071379972", Account: "15071379972", Password: "111111"}
 	// models.Insert(&account1)
 
-	//testJson()
+	// testJson()
 	beego.Run()
 }
 func testJson() {
@@ -40,13 +40,17 @@ func testJson() {
 	detail.Name = "1"
 
 	detail.Other = 2
-	detail.Msg = Message{"ray", 33}
-	fmt.Println(detail.Msg)
+	detail.Msgs = make([]Message, 3)
+
+	for i := 0; i < len(detail.Msgs); i++ {
+		detail.Msgs[i] = Message{"ray", 33}
+	}
+	// fmt.Println(detail.Msgs)
 	body, err := json.Marshal(detail)
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Println(string(body))
+	fmt.Println("body:", string(body))
 
 	js, err := simplejson.NewJson(body)
 	if err != nil {

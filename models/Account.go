@@ -21,11 +21,25 @@ func init() {
 	orm.RunSyncdb("default", false, false)                                        //后一个使用true会带上很多打印信息，数据库操作和建表操作的；第二个为true代表强制创建表
 	orm.Debug = true                                                              //true 打印数据库操作日志信息
 }
-func InsertAccount(account *Accounts) error {
+func InsertAccount(account *Accounts) (error, int) {
 	dbObj := orm.NewOrm() //实例化数据库操作对象
 	// dbObj.Using("account")
-	_, err := dbObj.Insert(account)
-	return err
+	fmt.Printf("account:", account)
+	CurrentAccount := new(Accounts)
+	err := dbObj.QueryTable("accounts").Filter("account", account.Account).One(CurrentAccount)
+	fmt.Printf("CurrentAccount:", CurrentAccount)
+	if err == orm.ErrMultiRows {
+		// 多条的时候报错
+		fmt.Printf("Returned Multi Rows Not One")
+	}
+	if err == orm.ErrNoRows {
+		// 没有找到记录
+		fmt.Printf("Not row found")
+		_, err1 := dbObj.Insert(account)
+		return err1, 0
+	}
+
+	return err, 1
 }
 
 func QueryAccount(account, password string) (*Accounts, error) {

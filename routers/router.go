@@ -27,5 +27,6 @@ func init() {
 	// 	),
 	// )
 	beego.Router("/login", &controllers.LoginContriller{})
+	beego.Router("/reg", &controllers.RegisterContriller{})
 	// beego.AddNamespace(ns)
 }

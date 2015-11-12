@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/astaxie/beego"
 	"goAPI/models"
@@ -10,41 +11,36 @@ type LoginContriller struct {
 	beego.Controller
 }
 
-func (this *LoginContriller) Get() {
-	fmt.Println("request:", this.Input().Get("name"))
-	this.Data["json"] = "hello ray get "
-	// name := this.Input().Get("name")
-	// password := this.Input().Get("password")
-	account := &models.Accounts{
-		Account:  "15971470520",
-		Password: "1234567",
-	}
-	models.InsertAccount(account)
-
-	account, err := models.QueryAccount("15971470520", "123456")
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(account)
-	}
-
-	this.ServeJson()
-}
-
 func (this *LoginContriller) Post() {
-	fmt.Println("request:", this.Input().Get("name"))
 	name := this.Input().Get("name")
 	password := this.Input().Get("password")
 
 	account, err := models.QueryAccount(name, password)
-	if err != nil {
-		fmt.Println(err)
-		this.Data["json"] = "login fail"
-		return
+	var m Message
+	if err == nil {
+		m.Status = 0
+		m.Msg = "login success"
+		m.Acc = *account
+
 	} else {
-		fmt.Println("login success", account)
-		this.Ctx.WriteString(account.Account)
-		this.Data["json"] = "login success"
+		fmt.Println(err)
+		m.Status = 1
+		m.Msg = "login fail"
 	}
+	this.Data["json"] = OToJson(m)
 	this.ServeJson()
+}
+
+type Message struct {
+	Msg    string
+	Status int
+	Acc    models.Accounts
+}
+
+func OToJson(o interface{}) string {
+	body, err := json.Marshal(o)
+	if err != nil {
+		panic(err.Error())
+	}
+	return string(body)
 }
