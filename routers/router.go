@@ -28,5 +28,8 @@ func init() {
 	// )
 	beego.Router("/login", &controllers.LoginContriller{})
 	beego.Router("/reg", &controllers.RegisterContriller{})
+
+	//set image static url
+	beego.SetStaticPath("/images", "images")
 	// beego.AddNamespace(ns)
 }
