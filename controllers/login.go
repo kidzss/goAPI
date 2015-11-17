@@ -14,27 +14,28 @@ type LoginContriller struct {
 func (this *LoginContriller) Post() {
 	name := this.Input().Get("name")
 	password := this.Input().Get("password")
+	authKey := this.Input().Get("authKey")
+
+	fmt.Println("name:", name)
+	fmt.Println("password:", password)
+	fmt.Println("authKey:", authKey)
 
 	account, err := models.QueryAccount(name, password)
-	var m Message
-	if err == nil {
-		m.Status = 0
-		m.Msg = "login success"
-		m.Acc = *account
+	var baseData models.BaseData
+	var mapdata MapData
+	if err == nil && len(authKey) != 0 {
+		baseData.Status = 0
+		baseData.Msg = "login success"
+		mapdata.Accounts = *account
 
 	} else {
 		fmt.Println(err)
-		m.Status = 1
-		m.Msg = "login fail"
+		baseData.Status = 1
+		baseData.Msg = "login fail"
 	}
-	this.Data["json"] = OToJson(m)
+	baseData.Result = mapdata
+	this.Data["json"] = OToJson(baseData)
 	this.ServeJson()
-}
-
-type Message struct {
-	Msg    string
-	Status int
-	Acc    models.Accounts
 }
 
 func OToJson(o interface{}) string {
@@ -43,4 +44,8 @@ func OToJson(o interface{}) string {
 		panic(err.Error())
 	}
 	return string(body)
+}
+
+type MapData struct {
+	Accounts interface{}
 }

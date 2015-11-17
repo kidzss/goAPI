@@ -11,14 +11,14 @@ import (
 	_ "goAPI/routers"
 )
 
-type MyData struct {
-	Name  string
-	Other float32
-	Msgs  []Message
+type mapData struct {
+	Name string
 }
-type Message struct {
-	Title string
-	Count float32
+
+type BaseData struct {
+	Msg    string
+	Status float32
+	Result mapData
 }
 
 func main() {
@@ -35,18 +35,14 @@ func main() {
 	beego.Run()
 }
 func testJson() {
-	var detail MyData
+	var m1 mapData
+	var b1 BaseData
+	m1.Name = "ray"
+	b1.Msg = "success"
+	b1.Status = 0
+	b1.Result = m1
 
-	detail.Name = "1"
-
-	detail.Other = 2
-	detail.Msgs = make([]Message, 3)
-
-	for i := 0; i < len(detail.Msgs); i++ {
-		detail.Msgs[i] = Message{"ray", 33}
-	}
-	// fmt.Println(detail.Msgs)
-	body, err := json.Marshal(detail)
+	body, err := json.Marshal(b1)
 	if err != nil {
 		panic(err.Error())
 	}
