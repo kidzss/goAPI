@@ -28,6 +28,7 @@ func init() {
 	// )
 	beego.Router("/login", &controllers.LoginContriller{})
 	beego.Router("/reg", &controllers.RegisterContriller{})
+	beego.Router("/upload", &controllers.UploadContriller{})
 
 	//set image static url
 	beego.SetStaticPath("/images", "images")
