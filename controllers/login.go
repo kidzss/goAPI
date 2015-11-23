@@ -21,20 +21,16 @@ func (this *LoginContriller) Post() {
 	fmt.Println("authKey:", authKey)
 
 	account, err := models.QueryAccount(name, password)
-	var baseData models.BaseData
 	var mapdata MapData
 	if err == nil && len(authKey) != 0 {
-		baseData.Status = 0
-		baseData.Msg = "login success"
 		mapdata.Accounts = *account
+		this.Data["json"] = map[string]interface{}{"errorCode": 0, "msg": "success", "result": mapdata}
 
 	} else {
 		fmt.Println(err)
-		baseData.Status = 1
-		baseData.Msg = "login fail"
+		this.Data["json"] = map[string]interface{}{"errorCode": 1, "msg": "fail" + err.Error(), "result": mapdata}
 	}
-	baseData.Result = mapdata
-	this.Data["json"] = OToJson(baseData)
+
 	this.ServeJson()
 }
 
