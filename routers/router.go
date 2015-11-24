@@ -11,6 +11,7 @@ import (
 	"goAPI/controllers"
 
 	"github.com/astaxie/beego"
+	"os"
 )
 
 func init() {
@@ -30,6 +31,7 @@ func init() {
 	beego.Router("/reg", &controllers.RegisterContriller{})
 	beego.Router("/upload", &controllers.UploadContriller{})
 
+	os.Mkdir("images", os.ModePerm)
 	//set image static url
 	beego.SetStaticPath("/images", "images")
 	// beego.AddNamespace(ns)
