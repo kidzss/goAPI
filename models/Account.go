@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
@@ -11,6 +12,7 @@ type Accounts struct {
 	MemberId string `orm:"size(20)"`
 	Account  string `orm:"size(20)"`
 	Password string `orm:"size(20)"`
+	ImageUrl string `orm:"size(200)"`
 }
 
 func init() {
@@ -60,7 +62,18 @@ func QueryAccount(account, password string) (*Accounts, error) {
 	return CurrentAccount, err
 }
 
-// func DeleteAccount(account *AccountInfo) error {
-// 	o := orm.NewOrm()
-// 	o.Using()
-// }
+// update
+// num, err := o.QueryTable("user").Filter("name", "slene").Update(orm.Params{
+//     "name": "astaxie",
+// })
+
+func UpdateAccount(account, ImageUrl string) error {
+	dbObj := orm.NewOrm() //实例化数据库操作对象
+	num, _ := dbObj.QueryTable("accounts").Filter("account", account).Update(orm.Params{"ImageUrl": ImageUrl})
+	if num == 1 {
+		return nil
+	} else {
+		return errors.New("update num is > 1")
+	}
+
+}
