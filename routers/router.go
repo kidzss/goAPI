@@ -31,6 +31,10 @@ func init() {
 	beego.Router("/reg", &controllers.RegisterContriller{})
 	beego.Router("/upload", &controllers.UploadContriller{})
 
+	// WebSocket.
+	beego.Router("/ws", &controllers.WebSocketController{})
+	beego.Router("/ws/join", &controllers.WebSocketController{}, "get:Join")
+
 	os.Mkdir("images", os.ModePerm)
 	//set image static url
 	beego.SetStaticPath("/images", "images")
