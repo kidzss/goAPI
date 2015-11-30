@@ -7,7 +7,7 @@ import (
 	"os"
 	"path"
 	// "time"
-	"goAPI/models"
+	// "goAPI/models"
 	"path/filepath"
 )
 
@@ -57,9 +57,9 @@ func (this *UploadContriller) Post() {
 	}
 
 	var url imageUrl
-	url.ImageUrl = "http://114.215.194.193:8088" + "/images/" + name + "/icon/" + h.Filename
+	url.ImageUrl = "http://114.215.94.193:8088" + "/images/" + name + "/icon/" + h.Filename
 	//icon insert into sql
-	models.UpdateAccount(name, url.ImageUrl)
+	//models.UpdateAccount(name, url.ImageUrl)
 	this.Data["json"] = map[string]interface{}{"errorCode": 0, "msg": "upload success", "result": url}
 	this.ServeJson()
 }
