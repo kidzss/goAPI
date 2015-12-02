@@ -17,20 +17,23 @@ func (this *RegisterContriller) Post() {
 	authKey := this.Input().Get("authKey")
 
 	account := new(models.Accounts)
-	baseData := new(models.BaseData)
 	account.Account = name
 	account.Password = password
+	var mapdata MapData
 	if len(authKey) == 0 {
-		baseData.Status = 1
-		baseData.Msg = "register"
+		mapdata.Accounts = nil
+		this.Data["json"] = map[string]interface{}{"errorCode": 1, "msg": "fail", "result": mapdata}
 	} else {
 
 		_, status := models.InsertAccount(account)
+		if status == 0 {
+			mapdata.Accounts = account
+			this.Data["json"] = map[string]interface{}{"errorCode": status, "msg": "register success", "result": mapdata}
+		} else {
+			this.Data["json"] = map[string]interface{}{"errorCode": 1, "msg": "this account is registed", "result": mapdata}
+		}
 
-		baseData.Status = status
-		baseData.Msg = "register"
-		baseData.Result = account
 	}
-	this.Data["json"] = OToJson(baseData)
+
 	this.ServeJson()
 }

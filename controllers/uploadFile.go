@@ -26,7 +26,7 @@ func (this *UploadContriller) Post() {
 	name := this.GetString("userName", "")
 	if len(name) == 0 {
 		defer f.Close()
-		this.Data["json"] = map[string]interface{}{"errorCode": 1, "msg": "input file name", "result": nil}
+		this.Data["json"] = map[string]interface{}{"errorCode": 1, "msg": "input user name", "result": nil}
 		this.ServeJson()
 		return
 
