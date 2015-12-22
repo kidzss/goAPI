@@ -45,7 +45,7 @@ func (this *WebSocketController) Join() {
 		return
 	}
 
-	// Upgrade from http request to WebSocket.
+	//1, Upgrade from http request to WebSocket.
 	ws, err := websocket.Upgrade(this.Ctx.ResponseWriter, this.Ctx.Request, nil, 1024, 1024)
 	if _, ok := err.(websocket.HandshakeError); ok {
 		http.Error(this.Ctx.ResponseWriter, "Not a websocket handshake", 400)
@@ -54,19 +54,7 @@ func (this *WebSocketController) Join() {
 		beego.Error("Cannot setup WebSocket connection:", err)
 		return
 	}
-
-	// Join chat room.
-	Join(uname, ws)
-	defer Leave(uname)
-
-	// Message receive loop.
-	for {
-		_, p, err := ws.ReadMessage()
-		if err != nil {
-			return
-		}
-		publish <- newEvent(models.EVENT_MESSAGE, uname, string(p))
-	}
+	go jionToChatRoom(uname, ws)
 }
 
 // broadcastWebSocket broadcasts messages to WebSocket users.
@@ -86,5 +74,21 @@ func broadcastWebSocket(event models.Event) {
 				unsubscribe <- sub.Value.(Subscriber).Name
 			}
 		}
+	}
+
+}
+
+func jionToChatRoom(uname string, ws *websocket.Conn) {
+	// Join chat room.
+	Join(uname, ws)
+	defer Leave(uname)
+
+	// Message receive loop.
+	for {
+		_, p, err := ws.ReadMessage()
+		if err != nil {
+			return
+		}
+		publish <- newEvent(models.EVENT_MESSAGE, uname, string(p))
 	}
 }
