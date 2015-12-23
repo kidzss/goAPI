@@ -16,12 +16,10 @@ package controllers
 
 import (
 	"encoding/json"
-	"net/http"
-
 	"github.com/astaxie/beego"
-	"github.com/gorilla/websocket"
-
 	"github.com/beego/samples/WebIM/models"
+	"github.com/gorilla/websocket"
+	"net/http"
 )
 
 // WebSocketController handles WebSocket requests.
@@ -44,17 +42,7 @@ func (this *WebSocketController) Join() {
 	if len(uname) == 0 {
 		return
 	}
-
-	//1, Upgrade from http request to WebSocket.
-	ws, err := websocket.Upgrade(this.Ctx.ResponseWriter, this.Ctx.Request, nil, 1024, 1024)
-	if _, ok := err.(websocket.HandshakeError); ok {
-		http.Error(this.Ctx.ResponseWriter, "Not a websocket handshake", 400)
-		return
-	} else if err != nil {
-		beego.Error("Cannot setup WebSocket connection:", err)
-		return
-	}
-	go jionToChatRoom(uname, ws)
+	go jionToChatRoom(uname, this)
 }
 
 // broadcastWebSocket broadcasts messages to WebSocket users.
@@ -78,7 +66,17 @@ func broadcastWebSocket(event models.Event) {
 
 }
 
-func jionToChatRoom(uname string, ws *websocket.Conn) {
+func jionToChatRoom(uname string, this *WebSocketController) {
+	var upgrader = &websocket.Upgrader{ReadBufferSize: 1024, WriteBufferSize: 1024}
+	//1, Upgrade from http request to WebSocket.
+	ws, err := upgrader.Upgrade(this.Ctx.ResponseWriter, this.Ctx.Request, nil)
+	if _, ok := err.(websocket.HandshakeError); ok {
+		http.Error(this.Ctx.ResponseWriter, "Not a websocket handshake", 400)
+		return
+	} else if err != nil {
+		beego.Error("Cannot setup WebSocket connection:", err)
+		return
+	}
 	// Join chat room.
 	Join(uname, ws)
 	defer Leave(uname)
