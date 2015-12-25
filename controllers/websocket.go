@@ -42,7 +42,18 @@ func (this *WebSocketController) Join() {
 	if len(uname) == 0 {
 		return
 	}
-	go jionToChatRoom(uname, this)
+	var upgrader = &websocket.Upgrader{ReadBufferSize: 1024, WriteBufferSize: 1024}
+	//1, Upgrade from http request to WebSocket.
+	ws, err := upgrader.Upgrade(this.Ctx.ResponseWriter, this.Ctx.Request, nil)
+	if _, ok := err.(websocket.HandshakeError); ok {
+		http.Error(this.Ctx.ResponseWriter, "Not a websocket handshake", 400)
+		return
+	} else if err != nil {
+		beego.Error("Cannot setup WebSocket connection:", err)
+		return
+	}
+
+	go jionToChatRoom(uname, ws)
 }
 
 // broadcastWebSocket broadcasts messages to WebSocket users.
@@ -66,17 +77,8 @@ func broadcastWebSocket(event models.Event) {
 
 }
 
-func jionToChatRoom(uname string, this *WebSocketController) {
-	var upgrader = &websocket.Upgrader{ReadBufferSize: 1024, WriteBufferSize: 1024}
-	//1, Upgrade from http request to WebSocket.
-	ws, err := upgrader.Upgrade(this.Ctx.ResponseWriter, this.Ctx.Request, nil)
-	if _, ok := err.(websocket.HandshakeError); ok {
-		http.Error(this.Ctx.ResponseWriter, "Not a websocket handshake", 400)
-		return
-	} else if err != nil {
-		beego.Error("Cannot setup WebSocket connection:", err)
-		return
-	}
+func jionToChatRoom(uname string, ws *websocket.Conn) {
+
 	// Join chat room.
 	Join(uname, ws)
 	defer Leave(uname)
