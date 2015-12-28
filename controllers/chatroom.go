@@ -56,6 +56,10 @@ var (
 	// Long polling waiting list.
 	waitingList = list.New()
 	subscribers = list.New()
+
+	//personal chat
+	ChaterChan = make(chan Chater, 10)
+	ChaterSave = list.New()
 )
 
 // This function handles all incoming chan messages.
@@ -98,7 +102,21 @@ func chatroom() {
 					break
 				}
 			}
+			//personal chat
+		case c := <-ChaterChan:
+			if !isUserLogin(ChaterSave, c.Name) {
+				ChaterSave.PushBack(c)
+			} else {
+				if !isUserLogin(ChaterSave, c.Who) {
+					beego.Info("your friends is no online")
+				} else {
+					beego.Info("your friends is online")
+				}
+
+			}
+
 		}
+
 	}
 }
 
@@ -109,6 +127,26 @@ func init() {
 func isUserExist(subscribers *list.List, user string) bool {
 	for sub := subscribers.Front(); sub != nil; sub = sub.Next() {
 		if sub.Value.(Subscriber).Name == user {
+			return true
+		}
+	}
+	return false
+}
+
+//person chat used
+func Chat(who string, user string, ws *websocket.Conn) {
+	ChaterChan <- Chater{Name: user, Who: who, Conn: ws}
+}
+
+type Chater struct {
+	Name string
+	Who  string
+	Conn *websocket.Conn // Only for WebSocket users; otherwise nil.
+}
+
+func isUserLogin(chaters *list.List, user string) bool {
+	for chater := chaters.Front(); chater != nil; chater = chater.Next() {
+		if chater.Value.(Chater).Name == user {
 			return true
 		}
 	}

@@ -16,6 +16,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/beego/samples/WebIM/models"
 	"github.com/gorilla/websocket"
@@ -82,6 +83,41 @@ func jionToChatRoom(uname string, ws *websocket.Conn) {
 	// Join chat room.
 	Join(uname, ws)
 	defer Leave(uname)
+
+	// Message receive loop.
+	for {
+		_, p, err := ws.ReadMessage()
+		if err != nil {
+			return
+		}
+		publish <- newEvent(models.EVENT_MESSAGE, uname, string(p))
+	}
+}
+
+// Join method handles WebSocket requests for WebSocketController.
+func (this *WebSocketController) Chat() {
+	uname := this.GetString("uname")
+	who := this.GetString("who")
+	if len(uname) == 0 {
+		fmt.Println("uname is null")
+		return
+	}
+	//build connect
+	var upgrader = &websocket.Upgrader{ReadBufferSize: 1024, WriteBufferSize: 1024}
+	//1, Upgrade from http request to WebSocket. ws is connect instance
+	ws, err := upgrader.Upgrade(this.Ctx.ResponseWriter, this.Ctx.Request, nil)
+	//handleshake
+	if _, ok := err.(websocket.HandshakeError); ok {
+		http.Error(this.Ctx.ResponseWriter, "Not a websocket handshake", 400)
+		return
+	} else if err != nil {
+		beego.Error("Cannot setup WebSocket connection:", err)
+		return
+	}
+
+	Chat(who, uname, ws)
+
+	// defer Leave(uname)
 
 	// Message receive loop.
 	for {
