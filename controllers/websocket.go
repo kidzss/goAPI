@@ -16,9 +16,9 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
+	// "fmt"
 	"github.com/astaxie/beego"
-	"github.com/bitly/go-simplejson"
+	// "github.com/bitly/go-simplejson"
 	"github.com/gorilla/websocket"
 	"goAPI/models"
 	"net/http"
@@ -68,17 +68,9 @@ func broadcastWebSocket(event models.Event) {
 	}
 	for sub := subscribers.Front(); sub != nil; sub = sub.Next() {
 		if event.Type == models.EVENT_CHAT {
-			body, err := json.Marshal(event.Content)
-			js, err := simplejson.NewJson(body)
-			if err != nil {
-				panic(err.Error())
-			}
-			maps, err1 := js.Map()
-			if err1 != nil {
-				fmt.Println(err)
-			}
-			to := fmt.Sprintf("%v", maps["to"].(string))
-			if to == sub.Value.(Subscriber).Name {
+			chat := new(models.ChatBean)
+			json.Unmarshal([]byte(event.Content), chat)
+			if chat.To == sub.Value.(Subscriber).Name {
 				// Immediately send event to WebSocket users.
 				ws := sub.Value.(Subscriber).Conn
 				if ws != nil {
@@ -87,10 +79,10 @@ func broadcastWebSocket(event models.Event) {
 						unsubscribe <- sub.Value.(Subscriber).Name
 					}
 				} else {
-					beego.Info(" your friend ", to, "is not online")
+					beego.Info(" your friend ", chat.To, "is not online")
 				}
 			} else {
-				beego.Info(" your friend ", to, "is not online")
+				beego.Info(" your friend ", chat.To, "is not online")
 			}
 		} else {
 			// Immediately send event to WebSocket users.
@@ -120,20 +112,15 @@ func jionToChatRoom(uname string, ws *websocket.Conn) {
 			return
 		}
 		//=======deal with chat====
-		js, err := simplejson.NewJson(p)
-		if err != nil {
-			panic(err.Error())
-		}
+		// js, err := simplejson.NewJson(p)
+		// if err != nil {
+		// 	panic(err.Error())
+		// }
+		chat := new(models.ChatBean)
+		json.Unmarshal(p, chat)
 
-		maps, err1 := js.Map() //maps is the params map
-		if err1 != nil {
-			panic(err1.Error())
-		}
-
-		tp, _ := maps["type"].(int)
-		to, _ := maps["to"].(string)
 		//=====================
-		if tp == 1 || len(to) > 0 {
+		if chat.Type == 1 || len(chat.To) > 0 {
 			publish <- newEvent(models.EVENT_CHAT, uname, string(p))
 		} else {
 			publish <- newEvent(models.EVENT_MESSAGE, uname, string(p))

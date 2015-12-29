@@ -58,3 +58,11 @@ func GetEvents(lastReceived int) []Event {
 	}
 	return events
 }
+
+type ChatBean struct {
+	Type        int
+	ChatContent string
+	Address     string
+	To          string
+	MLatLng     interface{}
+}
