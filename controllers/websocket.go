@@ -18,8 +18,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/astaxie/beego"
-	"github.com/beego/samples/WebIM/models"
+	"github.com/bitly/go-simplejson"
 	"github.com/gorilla/websocket"
+	"goAPI/models"
 	"net/http"
 )
 
@@ -59,21 +60,49 @@ func (this *WebSocketController) Join() {
 
 // broadcastWebSocket broadcasts messages to WebSocket users.
 func broadcastWebSocket(event models.Event) {
+
 	data, err := json.Marshal(event)
 	if err != nil {
 		beego.Error("Fail to marshal event:", err)
 		return
 	}
-
 	for sub := subscribers.Front(); sub != nil; sub = sub.Next() {
-		// Immediately send event to WebSocket users.
-		ws := sub.Value.(Subscriber).Conn
-		if ws != nil {
-			if ws.WriteMessage(websocket.TextMessage, data) != nil {
-				// User disconnected.
-				unsubscribe <- sub.Value.(Subscriber).Name
+		if event.Type == models.EVENT_CHAT {
+			body, err := json.Marshal(event.Content)
+			js, err := simplejson.NewJson(body)
+			if err != nil {
+				panic(err.Error())
+			}
+			maps, err1 := js.Map()
+			if err1 != nil {
+				fmt.Println(err)
+			}
+			to := fmt.Sprintf("%v", maps["to"].(string))
+			if to == sub.Value.(Subscriber).Name {
+				// Immediately send event to WebSocket users.
+				ws := sub.Value.(Subscriber).Conn
+				if ws != nil {
+					if ws.WriteMessage(websocket.TextMessage, data) != nil {
+						// User disconnected.
+						unsubscribe <- sub.Value.(Subscriber).Name
+					}
+				} else {
+					beego.Info(" your friend ", to, "is not online")
+				}
+			} else {
+				beego.Info(" your friend ", to, "is not online")
+			}
+		} else {
+			// Immediately send event to WebSocket users.
+			ws := sub.Value.(Subscriber).Conn
+			if ws != nil {
+				if ws.WriteMessage(websocket.TextMessage, data) != nil {
+					// User disconnected.
+					unsubscribe <- sub.Value.(Subscriber).Name
+				}
 			}
 		}
+
 	}
 
 }
@@ -90,41 +119,25 @@ func jionToChatRoom(uname string, ws *websocket.Conn) {
 		if err != nil {
 			return
 		}
-		publish <- newEvent(models.EVENT_MESSAGE, uname, string(p))
-	}
-}
-
-// Join method handles WebSocket requests for WebSocketController.
-func (this *WebSocketController) Chat() {
-	uname := this.GetString("uname")
-	who := this.GetString("who")
-	if len(uname) == 0 {
-		fmt.Println("uname is null")
-		return
-	}
-	//build connect
-	var upgrader = &websocket.Upgrader{ReadBufferSize: 1024, WriteBufferSize: 1024}
-	//1, Upgrade from http request to WebSocket. ws is connect instance
-	ws, err := upgrader.Upgrade(this.Ctx.ResponseWriter, this.Ctx.Request, nil)
-	//handleshake
-	if _, ok := err.(websocket.HandshakeError); ok {
-		http.Error(this.Ctx.ResponseWriter, "Not a websocket handshake", 400)
-		return
-	} else if err != nil {
-		beego.Error("Cannot setup WebSocket connection:", err)
-		return
-	}
-
-	Chat(who, uname, ws)
-
-	// defer Leave(uname)
-
-	// Message receive loop.
-	for {
-		_, p, err := ws.ReadMessage()
+		//=======deal with chat====
+		js, err := simplejson.NewJson(p)
 		if err != nil {
-			return
+			panic(err.Error())
 		}
-		publish <- newEvent(models.EVENT_MESSAGE, uname, string(p))
+
+		maps, err1 := js.Map() //maps is the params map
+		if err1 != nil {
+			panic(err1.Error())
+		}
+
+		tp, _ := maps["type"].(int)
+		to, _ := maps["to"].(string)
+		//=====================
+		if tp == 1 || len(to) > 0 {
+			publish <- newEvent(models.EVENT_CHAT, uname, string(p))
+		} else {
+			publish <- newEvent(models.EVENT_MESSAGE, uname, string(p))
+		}
+
 	}
 }

@@ -53,5 +53,9 @@ func testJson() {
 		panic(err.Error())
 	}
 
-	fmt.Println(js)
+	maps, err1 := js.Map()
+	if err1 != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(maps["Msg"])
 }

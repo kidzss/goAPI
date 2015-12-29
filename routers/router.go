@@ -34,7 +34,6 @@ func init() {
 	// WebSocket.
 	beego.Router("/ws", &controllers.WebSocketController{})
 	beego.Router("/ws/join", &controllers.WebSocketController{}, "get:Join")
-	beego.Router("/ws/chat", &controllers.WebSocketController{}, "get:Chat")
 	os.Mkdir("images", os.ModePerm)
 	//set image static url
 	beego.SetStaticPath("/images", "images")
