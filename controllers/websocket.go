@@ -22,6 +22,7 @@ import (
 	"github.com/gorilla/websocket"
 	"goAPI/models"
 	"net/http"
+	"strings"
 )
 
 // WebSocketController handles WebSocket requests.
@@ -70,21 +71,26 @@ func broadcastWebSocket(event models.Event) {
 		if event.Type == models.EVENT_CHAT {
 			chat := new(models.ChatBean)
 			json.Unmarshal([]byte(event.Content), chat)
-			if chat.To == sub.Value.(Subscriber).Name {
+			beego.Info("1")
+			if strings.EqualFold(chat.To, sub.Value.(Subscriber).Name) {
+				beego.Info("2")
 				// Immediately send event to WebSocket users.
 				ws := sub.Value.(Subscriber).Conn
 				if ws != nil {
+					beego.Info("3")
 					if ws.WriteMessage(websocket.TextMessage, data) != nil {
 						// User disconnected.
 						unsubscribe <- sub.Value.(Subscriber).Name
 					}
 				} else {
-					beego.Info(" your friend ", chat.To, "is not online")
+					beego.Info("4")
 				}
 			} else {
-				beego.Info(" your friend ", chat.To, "is not online")
+				beego.Info("5")
+				// beego.Info(" your friend ", chat.To, "is not online")
 			}
 		} else {
+			beego.Info("0")
 			// Immediately send event to WebSocket users.
 			ws := sub.Value.(Subscriber).Conn
 			if ws != nil {
